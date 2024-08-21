@@ -3,25 +3,26 @@ import { CheckInsRepository } from '@/repositories/check-ins-repository'
 import { CheckInUseCase } from './check-in'
 import { InMemoryCheckInsRepository } from '@/repositories/in-memory/in-memory-check-ins-repository'
 import { InMemoryGymsRepository } from '@/repositories/in-memory/in-memory-gyms-repository'
-import { Decimal } from '@prisma/client/runtime/library'
+import { MaxDistanceError } from './errors/max-distance-error'
+import { MaxNumberOfCheckInsError } from './errors/max-number-of-check-ins-error'
 
 let checkInsRepository: CheckInsRepository
 let gymsRepository: InMemoryGymsRepository
 let sut: CheckInUseCase
 
 describe('Check In User Case', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     checkInsRepository = new InMemoryCheckInsRepository()
     gymsRepository = new InMemoryGymsRepository()
     sut = new CheckInUseCase(checkInsRepository, gymsRepository)
 
-    gymsRepository.items.push({
+    await gymsRepository.create({
       id: 'gym-01',
       title: 'JavaScript Gym',
       description: '',
       phone: '',
-      latitude: new Decimal(-42.736929),
-      longitude: new Decimal(-5.0867186),
+      latitude: -42.736929,
+      longitude: -5.0867186,
     })
 
     vi.useFakeTimers()
@@ -59,7 +60,7 @@ describe('Check In User Case', () => {
         userLatitude: -42.736929,
         userLongitude: -5.0867186,
       }),
-    ).rejects.toBeInstanceOf(Error)
+    ).rejects.toBeInstanceOf(MaxNumberOfCheckInsError)
   })
 
   it('should be able to check in twice but in different days', async () => {
@@ -85,13 +86,13 @@ describe('Check In User Case', () => {
   })
 
   it('should not be able to check in on distant gym', async () => {
-    gymsRepository.items.push({
+    await gymsRepository.create({
       id: 'gym-02',
       title: 'JavaScript Gym',
       description: '',
       phone: '',
-      latitude: new Decimal(5.0737749),
-      longitude: new Decimal(-42.6181061),
+      latitude: 5.0737749,
+      longitude: -42.6181061,
     })
 
     await expect(
@@ -101,6 +102,6 @@ describe('Check In User Case', () => {
         userLatitude: -42.736929,
         userLongitude: -5.0867186,
       }),
-    ).rejects.toBeInstanceOf(Error)
+    ).rejects.toBeInstanceOf(MaxDistanceError)
   })
 })
