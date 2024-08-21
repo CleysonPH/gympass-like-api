@@ -6,6 +6,12 @@ import { randomUUID } from 'node:crypto'
 export class InMemoryGymsRepository implements GymsRepository {
   public items: Gym[] = []
 
+  async findManyByTitle(title: string, page: number): Promise<Gym[]> {
+    return this.items
+      .filter((gym) => gym.title.includes(title))
+      .slice((page - 1) * 20, page * 20)
+  }
+
   async findById(id: string): Promise<Gym | null> {
     const gym = this.items.find((gym) => gym.id === id)
 
