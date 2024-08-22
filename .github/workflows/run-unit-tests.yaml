@@ -1,5 +1,5 @@
 name: run-unit-tests
-run-name: Rn Unit Tests
+run-name: Run Unit Tests
 
 on:
   - push
