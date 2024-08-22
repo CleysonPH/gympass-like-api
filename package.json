@@ -9,8 +9,9 @@
     "build": "tsup src --out-dir build",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "test": "vitest run",
-    "test:watch": "vitest",
+    "test:e2e": "vitest run --dir src/http",
+    "test": "vitest run --dir src/use-cases",
+    "test:watch": "vitest --dir src/use-cases",
     "test:coverage": "vitest run --coverage",
     "test:ui": "vitest --ui"
   },
